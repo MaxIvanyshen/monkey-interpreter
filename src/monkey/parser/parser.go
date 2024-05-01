@@ -40,6 +40,7 @@ var precedences = map[token.TokenType]int {
     token.MINUS: SUM,
     token.SLASH: PRODUCT,
     token.ASTERISK: PRODUCT,
+    token.MODULO: PRODUCT,
     token.LPAREN: CALL,
 }
 
@@ -58,6 +59,7 @@ func New(l *lexer.Lexer) *Parser {
     p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
     p.registerPrefix(token.IDENT, p.parseIdentifier)
     p.registerPrefix(token.INT, p.parseIntegerLiteral)
+    p.registerPrefix(token.STRING, p.parseString)
     p.registerPrefix(token.BANG, p.parsePrefixExpression)
     p.registerPrefix(token.MINUS, p.parsePrefixExpression)
     p.registerPrefix(token.TRUE, p.parseBoolean)
@@ -76,6 +78,8 @@ func New(l *lexer.Lexer) *Parser {
     p.registerInfix(token.LT, p.parseInfixExpression)
     p.registerInfix(token.RT, p.parseInfixExpression)
     p.registerInfix(token.LPAREN, p.parseCallExpression)
+    p.registerInfix(token.STRING, p.parseInfixExpression)
+    p.registerInfix(token.MODULO, p.parseInfixExpression)
 
     //read 2 tokens, so currToken and peekToken have values
     p.nextToken()
@@ -122,6 +126,10 @@ func (p *Parser) parseStatement() ast.Statement {
     default:
         return p.parseExpressionStatement()
     }
+}
+
+func (p *Parser) parseString() ast.Expression {
+    return &ast.StringExpression{Token: p.currToken, Value: p.currToken.Literal}    
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {

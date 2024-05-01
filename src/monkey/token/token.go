@@ -14,6 +14,7 @@ const (
     //identifiers + literals
     IDENT = "IDENT"
     INT = "INT"
+    STRING = "STRING"
 
     //operators
     ASSIGN = "="
@@ -22,6 +23,7 @@ const (
     BANG = "!"
     ASTERISK = "*"
     SLASH = "/"
+    MODULO = "%"
 
     LT = "<"
     RT = ">"

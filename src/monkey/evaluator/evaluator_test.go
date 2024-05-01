@@ -314,3 +314,20 @@ func TestClosures(t *testing.T) {
 
     testIntegerObject(t, testEval(input), 5)
 }
+
+func TestStrings(t *testing.T) {
+    input := 
+    `
+    let x = "hello";
+    x;
+    `
+    evalObj := testEval(input)
+
+    if evalObj.Type() != object.STRING_OBJ {
+        t.Errorf("type is not STRING_OBJ. got %+v", evalObj.Type())
+    }
+
+    if evalObj.Inspect() != "hello" {
+        t.Errorf("value is not \"hello\". got \"%v\"", evalObj.Inspect())
+    }
+}

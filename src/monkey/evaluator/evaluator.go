@@ -37,6 +37,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 
     //Expressions
+    case *ast.StringExpression:
+        return &object.String{Value: node.Value}
     case *ast.IntegerLiteral:
         return &object.Integer{Value: node.Value}
     case *ast.Boolean:
@@ -173,6 +175,8 @@ func evalMinusPrefixOperatorExpression(right object.Object, env *object.Environm
 
 func evalInfixExpression(operator string, left, right object.Object, env *object.Environment) object.Object {
     switch {
+    case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ && operator == "+":
+        return evalStringConcatenation(left, right)
     case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
         return evalIntegerInfixExpression(operator, left, right)
     case operator == "==":
@@ -184,6 +188,10 @@ func evalInfixExpression(operator string, left, right object.Object, env *object
     default:
         return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
     }
+}
+
+func evalStringConcatenation(left, right object.Object) object.Object {
+    return &object.String{Value: left.Inspect() + right.Inspect()}
 }
 
 func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
@@ -199,6 +207,8 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
         return &object.Integer{Value: leftVal * rightVal}
     case "/":
         return &object.Integer{Value: leftVal / rightVal}
+    case "%":
+        return &object.Integer{Value: leftVal % rightVal}
     case "<":
         return nativeBoolToBooleanObject(leftVal < rightVal)
     case ">":

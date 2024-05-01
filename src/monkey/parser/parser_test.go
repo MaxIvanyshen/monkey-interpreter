@@ -111,6 +111,26 @@ func TestReturnStatement(t *testing.T) {
     }
 }
 
+func TestStringExpressions(t *testing.T) {
+    input := "\"hello\""
+
+    l := lexer.New(input); 
+    p := New(l)
+
+    program := p.ParseProgram()
+    checkParserErrors(t, p)
+
+    if len(program.Statements) != 1 {
+        t.Fatalf("program.Statements does not contain 1 statement. got %d", 
+        len(program.Statements))
+    }
+
+    strExp := program.Statements[0].(*ast.ExpressionStatement).Expression.(*ast.StringExpression)
+    if strExp.Value != "hello" {
+        t.Errorf("string expression does not equal %v. got %v", "hello", strExp.Value)
+    }
+}
+
 func TestReturnStatements(t *testing.T) {
     tests := []struct {
         input string
@@ -265,6 +285,7 @@ func TestParsingInfixExpressions(t *testing.T) {
         {"5 < 5;", 5, "<", 5},
         {"5 == 5;", 5, "==", 5},
         {"5 != 5;", 5, "!=", 5},
+        {"5 % 5;", 5, "%", 5},
     }
 
     for _, tt := range infixTests {
@@ -731,4 +752,27 @@ func TestCallExpressionParsing(t *testing.T) {
     testLiteralExpression(t, exp.Arguments[0], 1)
     testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
     testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
+}
+
+func TestStringConcatenation(t *testing.T) {
+    input := "\"hello \" + \"world\";"
+
+    l := lexer.New(input)
+    p := New(l)
+    program := p.ParseProgram()
+    checkParserErrors(t, p)
+
+    exp := program.Statements[0].(*ast.ExpressionStatement).Expression.(*ast.InfixExpression)
+
+    if exp.Left.String() != "hello " {
+        t.Errorf("wrong value. want \"%v\", got \"%v\"", "hello ", exp.Left.String())
+    }
+
+    if exp.Right.String() != "world" {
+        t.Errorf("wrong value. want \"%v\", got \"%v\"", "world", exp.Right.String())
+    }
+    
+    if exp.Operator != "+" {
+        t.Errorf("wrong operator. want \"%v\", got \"%v\"", "+", exp.Operator)
+    }
 }
